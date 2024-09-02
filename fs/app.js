@@ -12,9 +12,9 @@ const fs = require("node:fs/promises");
 		const length = buffer.byteLength;
 		const position = 0;
 
-		const fileContent = await file.read(buffer, offset, length, position);
+		await file.read(buffer, offset, length, position);
 
-		console.log(fileContent);
+		console.log(buffer.toString("utf8"));
 	});
 
 	for await (const event of watcher) {
