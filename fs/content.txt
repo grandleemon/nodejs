@@ -1,1 +1,1 @@
-create a file test.txt
+add to the file text2.tx this content: new content
