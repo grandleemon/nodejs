@@ -26,6 +26,23 @@
 //
 // console.timeEnd("Test");
 
+// const fs = require("node:fs/promises");
+//
+// (async () => {
+// 	console.time("Test");
+//
+// 	const file = await fs.open("test.txt", "w");
+//
+// 	const stream = file.createWriteStream();
+//
+// 	for (let i = 0; i < 1000000; i++) {
+// 		const buffer = Buffer.from(` ${i} `);
+// 		stream.write(buffer);
+// 	}
+//
+// 	console.timeEnd("Test");
+// })();
+
 const fs = require("node:fs/promises");
 
 (async () => {
@@ -34,11 +51,31 @@ const fs = require("node:fs/promises");
 	const file = await fs.open("test.txt", "w");
 
 	const stream = file.createWriteStream();
+	let i = 0;
 
-	for (let i = 0; i < 1000000; i++) {
-		const buffer = Buffer.from(` ${i} `);
-		stream.write(buffer);
-	}
+	const write = () => {
+		while (i < 1000000) {
+			const buffer = Buffer.from(` ${i} `);
 
-	console.timeEnd("Test");
+			if (i === 999999) {
+				return stream.end(buffer);
+			}
+
+			if (!stream.write(buffer)) break;
+
+			i++;
+		}
+	};
+
+	write();
+
+	stream.on("drain", (arg) => {
+		write();
+	});
+
+	stream.on("finish", () => {
+		console.timeEnd("Test");
+		file.close();
+	});
+
 })();
