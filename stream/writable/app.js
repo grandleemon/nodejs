@@ -61,9 +61,9 @@ const fs = require("node:fs/promises");
 				return stream.end(buffer);
 			}
 
-			if (!stream.write(buffer)) break;
-
 			i++;
+
+			if (!stream.write(buffer)) break;
 		}
 	};
 
