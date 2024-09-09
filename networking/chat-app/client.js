@@ -22,6 +22,8 @@ const moveCursor = (dx, dy) => {
 	});
 };
 
+let id;
+
 const client = net.createConnection({
 	port: 3000,
 	host: "127.0.0.1"
@@ -32,21 +34,26 @@ const client = net.createConnection({
 		const message = await rl.question("Enter a message: ");
 		await moveCursor(0, -1);
 		await clearLine(0);
-		client.write(message);
+		client.write(`${id}-message-${message}`);
 	};
-
-	await ask();
 
 	client.on("data", async (data) => {
 		console.log();
 		await moveCursor(0, -1);
 		await clearLine(0);
-		console.log(data.toString("utf8"));
+
+		if (data.toString("utf8").startsWith("id-")) {
+			id = data.toString("utf8").substring(3);
+			console.log(`Your id is ${id}!\n`);
+		} else {
+			console.log(data.toString("utf8"));
+		}
 
 		await ask();
 	});
-});
 
+
+});
 
 
 client.on("end", () => {

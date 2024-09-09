@@ -5,14 +5,27 @@ const server = net.createServer();
 const clients = [];
 
 server.on("connection", (socket) => {
+	const clientId = clients.length + 1;
+
 	console.log("A new connection to the server");
 
-	clients.push(socket);
+	socket.write(`id-${clientId}`)
+
+	console.log("socket write");
 
 	socket.on("data", (data) => {
-		clients.forEach(socket => {
-			socket.write(data);
+		const message = data.toString("utf8").split("-message-");
+		const id = message[0];
+		const msg = message[1];
+
+		clients.forEach(({ socket }) => {
+			socket.write(`User ${id}: ${msg}`);
 		})
+	});
+
+	clients.push({
+		id: clientId.toString(),
+		socket
 	});
 });
 
