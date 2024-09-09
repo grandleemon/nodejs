@@ -13,6 +13,10 @@ server.on("connection", (socket) => {
 
 	console.log("socket write");
 
+	clients.forEach(({ socket }) => {
+		socket.write(`\nUser ${clientId} joined`);
+	})
+
 	socket.on("data", (data) => {
 		const message = data.toString("utf8").split("-message-");
 		const id = message[0];
@@ -22,6 +26,12 @@ server.on("connection", (socket) => {
 			socket.write(`User ${id}: ${msg}`);
 		})
 	});
+
+	socket.on("error", () => {
+		clients.forEach(({ socket }) => {
+			socket.write(`\nUser ${clientId} left`);
+		})
+	})
 
 	clients.push({
 		id: clientId.toString(),
