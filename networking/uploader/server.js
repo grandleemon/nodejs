@@ -13,15 +13,31 @@ server.on("connection", (socket) => {
 	console.log("New connection");
 
 	socket.on("data", async (data) => {
-		fileHandle = await fs.open(`storage/test.txt`, "w");
+		if (!fileHandle) {
+			socket.pause();
+			fileHandle = await fs.open(`storage/test.txt`, "w");
+			writeStream = fileHandle.createWriteStream();
 
-		writeStream = fileHandle.createWriteStream();
-		writeStream.write(data);
+			writeStream.write(data);
+
+			socket.resume();
+
+			writeStream.on("drain", () => {
+				socket.resume();
+			});
+		} else {
+			if (!writeStream.write(data)) {
+				socket.pause();
+			}
+		}
 	});
 
+
 	socket.on("end", () => {
-		console.log("Connection closed");
 		fileHandle.close();
+		fileHandle = null;
+		writeStream = null;
+		console.log("Connection closed");
 	});
 });
 

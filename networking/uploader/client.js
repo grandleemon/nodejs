@@ -14,7 +14,14 @@ const client = net.createConnection({
 	const readStream = fileHandle.createReadStream();
 
 	readStream.on("data", (data) => {
-		client.write(data);
+		if (!client.write(data)) {
+			console.log("here");
+			readStream.pause();
+		}
+	});
+
+	client.on("drain", () => {
+		readStream.resume();
 	});
 
 	readStream.on("end", () => {
