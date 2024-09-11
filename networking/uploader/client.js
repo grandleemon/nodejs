@@ -5,6 +5,22 @@ const path = require("node:path");
 const PORT = 5050;
 const HOST = "::1";
 
+const clearLine = (dir) => {
+	return new Promise((res, rej) => {
+		process.stdout.clearLine(dir, () => {
+			res();
+		});
+	});
+};
+
+const moveCursor = (dx, dy) => {
+	return new Promise((res, rej) => {
+		process.stdout.moveCursor(dx, dy, () => {
+			res();
+		});
+	});
+};
+
 const client = net.createConnection({
 	host: HOST,
 	port: PORT
@@ -15,12 +31,26 @@ const client = net.createConnection({
 	const fileHandle = await fs.open(filePath, "r");
 	const readStream = fileHandle.createReadStream();
 
-	client.write(`fileName: ${fileName}-`)
+	let bytesRead = 0;
+	const totalBytes = (await fileHandle.stat()).size;
 
-	readStream.on("data", (data) => {
+	client.write(`fileName: ${fileName}-`);
+
+	readStream.on("data", async (data) => {
 		if (!client.write(data)) {
 			readStream.pause();
 		}
+
+		if (bytesRead === 0) console.log("Uploading started");
+
+		bytesRead += data.byteLength;
+
+		const progress = ((bytesRead / totalBytes) * 100).toFixed(0);
+
+		console.log(`Uploading progress: ${progress}%`);
+
+		await moveCursor(0, -1);
+		await clearLine(0);
 	});
 
 	client.on("drain", () => {

@@ -6,11 +6,13 @@ const HOST = "::1";
 
 const server = net.createServer(() => {});
 
-let fileHandle;
-let writeStream;
+
 
 server.on("connection", (socket) => {
 	console.log("New connection");
+
+	let fileHandle;
+	let writeStream;
 
 	socket.on("data", async (data) => {
 		if (!fileHandle) {
