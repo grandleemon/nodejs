@@ -6,8 +6,6 @@ const HOST = "::1";
 
 const server = net.createServer(() => {});
 
-
-
 server.on("connection", (socket) => {
 	console.log("New connection");
 

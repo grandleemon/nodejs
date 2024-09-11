@@ -3,7 +3,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 
 const PORT = 5050;
-const HOST = "::1";
+const HOST = "16.171.3.75";
 
 const clearLine = (dir) => {
 	return new Promise((res, rej) => {
@@ -41,6 +41,9 @@ const client = net.createConnection({
 			readStream.pause();
 		}
 
+		await moveCursor(0, -1);
+		await clearLine(0);
+
 		if (bytesRead === 0) console.log("Uploading started");
 
 		bytesRead += data.byteLength;
@@ -48,9 +51,6 @@ const client = net.createConnection({
 		const progress = ((bytesRead / totalBytes) * 100).toFixed(0);
 
 		console.log(`Uploading progress: ${progress}%`);
-
-		await moveCursor(0, -1);
-		await clearLine(0);
 	});
 
 	client.on("drain", () => {
